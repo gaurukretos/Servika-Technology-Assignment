@@ -1,65 +1,91 @@
 package com.servikatech.servika.controller;
 
-import java.util.List;
-import java.util.UUID;
-
+import com.servikatech.servika.model.Product;
+import com.servikatech.servika.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.servikatech.servika.model.Product;
-import com.servikatech.servika.service.ProductService;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.UUID;
 
-@RequestMapping("/api/products")
 @RestController
+@RequestMapping(path = "/api/products")
+@Tag(name = "Product Management", description = "Operations for managing products")
+@SecurityRequirement(name = "bearer-jwt")
 public class ProductController {
 
     @Autowired
     private ProductService productService;
 
-    @Autowired
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    @Operation(summary = "Get all products", description = "Retrieves a list of all available products")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of products"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required")
+    })
+    @GetMapping
+    public ResponseEntity<List<com.servikatech.servika.model.Product>> getAllProducts() {
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
-    @GetMapping("/product")
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
-        return new ResponseEntity<>(products, HttpStatus.OK);
+    @Operation(summary = "Get product by ID", description = "Returns a single product by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the product", content = @Content(schema = @Schema(implementation = Product.class))),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<com.servikatech.servika.model.Product> getProductById(
+            @Parameter(description = "ID of the product to retrieve") @PathVariable UUID id) {
+        return ResponseEntity.ok(productService.getProductById(id));
     }
 
-    @GetMapping("/product/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable UUID id) {
-        Product product = productService.getProductById(id);
-        return new ResponseEntity<>(product, HttpStatus.OK);
+    @Operation(summary = "Create a new product", description = "Creates a new product in the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Product successfully created", content = @Content(schema = @Schema(implementation = Product.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid product data provided"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required")
+    })
+    @PostMapping
+    public ResponseEntity<com.servikatech.servika.model.Product> createProduct(
+            @Parameter(description = "Product object to be added") @Valid @RequestBody com.servikatech.servika.model.Product product) {
+        return new ResponseEntity<>(productService.createProduct(product), HttpStatus.CREATED);
     }
 
-    @PostMapping("/product")
-    public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) {
-        Product createdProduct = productService.createProduct(product);
-        return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
+    @Operation(summary = "Update an existing product", description = "Updates a product's information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product successfully updated", content = @Content(schema = @Schema(implementation = Product.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid product data provided"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<com.servikatech.servika.model.Product> updateProduct(
+            @Parameter(description = "ID of the product to update") @PathVariable UUID id,
+            @Parameter(description = "Updated product information") @Valid @RequestBody com.servikatech.servika.model.Product product) {
+        return ResponseEntity.ok(productService.updateProduct(id, product));
     }
 
-    @PutMapping("/product/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable UUID id, @Valid @RequestBody Product productDetails) {
-        Product updatedProduct = productService.updateProduct(id, productDetails);
-        return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/product/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
+    @Operation(summary = "Delete a product", description = "Deletes a product from the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Product successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(
+            @Parameter(description = "ID of the product to delete") @PathVariable UUID id) {
         productService.deleteProduct(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
 }
