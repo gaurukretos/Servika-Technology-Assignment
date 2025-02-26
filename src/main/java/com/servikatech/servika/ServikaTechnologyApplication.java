@@ -1,0 +1,13 @@
+package com.servikatech.servika;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ServikaTechnologyApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ServikaTechnologyApplication.class, args);
+	}
+
+}
