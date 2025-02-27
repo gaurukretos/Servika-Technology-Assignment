@@ -14,15 +14,15 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Servika Technology API")
-                        .version("1.0")
+                        .version("3.0")
                         .description("API documentation for Servika Technology project"));
     }
 
     @Bean
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
-                .group("public")
-                .pathsToMatch("/**")
+                .group("product-api")
+                .pathsToMatch("/api/products/**")
                 .build();
     }
 }
