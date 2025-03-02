@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 
 @SpringBootApplication
-@OpenAPIDefinition(info = @Info(title = "Platform API", version = "3.0", description = "Platform API Server"))
+@OpenAPIDefinition(info = @Info(title = "Servika Tech Assignment API", version = "3.0", description = "Servika Tech API Server"))
 
 public class ServikaTechnologyApplication {
 
